@@ -3,7 +3,7 @@ import toxi.geom.Vec3D;
 public class trail extends Vec3D {
     private CaveFlockVik p1;
     Vec3D orientation;
-    public int  trailNo = 10000;
+    public int  trailNo = 70;
     public int strength = trailNo;
     Boid b;
 

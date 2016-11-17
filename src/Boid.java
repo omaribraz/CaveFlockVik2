@@ -21,7 +21,7 @@ public class Boid extends Vec3D {
     Vec3D coh = null;
     Vec3D stig = null;
 
-    public ArrayList<trail> trailPop;
+    List<List<trail>> trailpop;
 
     float maxforce;
     float maxspeed;
@@ -34,6 +34,7 @@ public class Boid extends Vec3D {
     int printcnt;
     int type;
     int bouncecnt;
+    int trno = -1;
 
     Boid(CaveFlockVik _p, Vec3D pos, Vec3D _vel, int _type) {
         super(pos);
@@ -43,7 +44,7 @@ public class Boid extends Vec3D {
         acc = new Vec3D(0, 0, 0);
         maxspeed = 2;
         maxforce = 0.07f;
-        trailPop = new ArrayList<>();
+        trailpop = new ArrayList<>();
     }
 
     void rules(Boid a) {
@@ -177,7 +178,7 @@ public class Boid extends Vec3D {
         }
         if (type == 4) {
             trail tr = new trail(p, this.copy(), vel.copy());
-            trailPop.add(tr);
+            trailpop.get(trno).add(tr);
         }
         printcnt++;
     }
@@ -185,18 +186,21 @@ public class Boid extends Vec3D {
     void trailupdate() {
         p.noFill();
         p.strokeWeight(2);
-        p.beginShape();
-        for (int i = 0; i < trailPop.size(); i++) {
-            trail t = trailPop.get(i);
-            t.update();
-            float lerp1 = PApplet.map(t.strength, 0, t.trailNo, 0, 1);
-            int c1 = p.color(60, 120, 255, 20);
-            int c2 = p.color(255, 165, 0, 255);
-            int c = p.lerpColor(c1, c2, lerp1);
-            p.stroke(c);
-            p.curveVertex(t.x, t.y, t.z);
+
+        for (int i = 0; i < trailpop.size(); i++) {
+            List<trail> a = trailpop.get(i);
+            p.beginShape();
+            for (int j = 0; j < a.size(); j++) {
+                trail t = a.get(j);
+                float lerp1 = PApplet.map(j, 0, t.trailNo, 0, 1);
+                int c1 = p.color(200, 60, 20, 255);
+                int c2 = p.color(0, 0, 255, 255);
+                int c = p.lerpColor(c1, c2, lerp1);
+                p.stroke(c);
+                p.curveVertex(t.x, t.y, t.z);
+            }
+            p.endShape();
         }
-        p.endShape();
     }
 
     void render() {
@@ -252,6 +256,8 @@ public class Boid extends Vec3D {
         float varb = b.distanceTo(this);
         if (varb < 54) {
             type = 4;
+            trailpop.add(new ArrayList<trail>());
+            trno++;
             node2 = false;
             Vec3D c = seekclosestpt(0);
             p.vertexhash.get(c).taken = 1;
