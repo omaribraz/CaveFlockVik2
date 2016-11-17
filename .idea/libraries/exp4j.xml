@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="exp4j">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/library/hemesh/exp4j.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/library/hemesh/hemesh-data-2_2_0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/library/hemesh/hemesh-external-2_2_0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/library/hemesh/hemesh.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/library/hemesh/javolution-6.1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/library/hemesh/jts.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/library/hemesh/objparser.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/library/hemesh/trove-3.1a1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
