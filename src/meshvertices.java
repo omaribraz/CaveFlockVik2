@@ -8,6 +8,7 @@ public class meshvertices extends Vec3D {
     Vec3D Normal;
     int taken;
     int takencnt;
+    Boid boid;
 
 
     meshvertices( CaveFlockVik _p, Vec3D v, int s, Vec3D n) {
@@ -19,10 +20,18 @@ public class meshvertices extends Vec3D {
         takencnt = 0;
     }
 
+    void update(){
+        if(takencnt>7){
+            p.vertexpop.remove(this);
+        }
+        render();
+
+    }
+
 
 
     void render(){
-        p.stroke(200);
+        p.stroke(200,20);
         p.strokeWeight(2);
         p.point(this.x,this.y,this.z);
     }

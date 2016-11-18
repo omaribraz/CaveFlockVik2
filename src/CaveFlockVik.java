@@ -63,6 +63,8 @@ public class CaveFlockVik extends PApplet {
     float RADIUS = 20;
 
 
+
+
     Octree meshoctree;
     Octree boidoctree;
 
@@ -94,11 +96,11 @@ public class CaveFlockVik extends PApplet {
         meshoctree=new Octree(this,new Vec3D(-1, -1, -1).scaleSelf(a), DIM*2);
         boidoctree =new Octree(this,new Vec3D(-1, -1, -1).scaleSelf(a), DIM*2);
 
-        for (int i = 0; i <10; i++) {
+        for (int i = 0; i <100; i++) {
             flock.addBoid(new Boid(this,new Vec3D(random(xminint+200, xmaxint-200), random(yminint+200, ymaxint-200), random(zminint+200, zmaxint-200)), new Vec3D(random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI)),1));
         }
 
-        for (int i = 0; i <20; i++) {
+        for (int i = 0; i <200; i++) {
             flock.addBoid(new Boid(this,new Vec3D(random(xminint+200, xmaxint-200), random(yminint+200, ymaxint-200), random(zminint+200, zmaxint-200)), new Vec3D(random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI)),2));
         }
 
@@ -136,7 +138,7 @@ public class CaveFlockVik extends PApplet {
 
         for(int i = 0; i<vertexpop.size(); i++){
             meshvertices a = vertexpop.get(i);
-            a.render();
+            a.update();
         }
     }
 

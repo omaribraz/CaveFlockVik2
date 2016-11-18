@@ -20,6 +20,7 @@ public class Boid extends Vec3D {
     Vec3D ali = null;
     Vec3D coh = null;
     Vec3D stig = null;
+    Boid stigboid = null;
 
     List<List<trail>> trailpop;
 
@@ -29,6 +30,7 @@ public class Boid extends Vec3D {
     boolean print = false;
     boolean node = false;
     boolean node2 = false;
+    boolean stigfollow = false;
 
     int popsize;
     int printcnt;
@@ -64,17 +66,23 @@ public class Boid extends Vec3D {
             a.print = true;
         }
 
-        if ((a.printcnt > 80)&&(type==3)) {
+        if ((a.printcnt > 60) && (type == 3)) {
             a.type = 1;
             a.print = false;
             a.printcnt = 0;
         }
 
-        if ((a.printcnt > 70)&&(type==4)) {
+        if ((a.printcnt > 30) && (type == 4)) {
             a.type = 2;
             a.print = false;
             a.printcnt = 0;
         }
+
+        if (stigboid != null) {
+            if (stigboid.trailpop.get(0).size() > 0) {
+                stigfollow = true;
+            }
+        } else stigfollow = false;
 
     }
 
@@ -90,7 +98,7 @@ public class Boid extends Vec3D {
             a.sep.scaleSelf(6.0f);
             a.ali.scaleSelf(0.4f);
             a.coh.scaleSelf(0.1f);
-            a.stig.scaleSelf(6.0f);
+            if (stigfollow) a.stig.scaleSelf(0.7f);
         }
 
         if (a.type == 3) {
@@ -127,7 +135,6 @@ public class Boid extends Vec3D {
         popsize = 0;
 
 
-
         if (boidpos != null) {
 
             sep = separate(boidpos);
@@ -135,7 +142,7 @@ public class Boid extends Vec3D {
             coh = cohesion(boidpos);
             if ((node) && (type == 1)) nod = vertexseek();
             if ((node2) && (type == 2) && (p.start2)) nod2 = vertexseek1();
-            stig = seektrail(p.flock.trailPop);
+            if ((type == 4) && (stigfollow)&&(stigboid != null)) stig = seektrail(stigboid.trailpop);
 
             flockrules(this);
 
@@ -145,12 +152,11 @@ public class Boid extends Vec3D {
             applyForce(coh);
             if ((node) && (type == 1)) applyForce(nod);
             if ((node2) && (type == 2) && (p.start2)) applyForce(nod2);
-            applyForce(stig);
+            if ((type == 4) && (stigfollow)) applyForce(stig);
         }
     }
 
     void update() {
-
         vel.addSelf(acc);
         vel.limit(maxspeed);
         this.addSelf(vel);
@@ -171,19 +177,13 @@ public class Boid extends Vec3D {
     }
 
     void trail() {
-
-        if (type == 3) {
-            trail tr = new trail(p, this.copy(), vel.copy());
-            p.flock.addTrail(tr);
-        }
-        if (type == 4) {
-            trail tr = new trail(p, this.copy(), vel.copy());
-            trailpop.get(trno).add(tr);
-        }
+        trail tr = new trail(p, this.copy(), vel.copy());
+        trailpop.get(trno).add(tr);
         printcnt++;
     }
 
-    void trailupdate() {
+
+    void trailrender() {
         p.noFill();
         p.strokeWeight(2);
 
@@ -192,11 +192,22 @@ public class Boid extends Vec3D {
             p.beginShape();
             for (int j = 0; j < a.size(); j++) {
                 trail t = a.get(j);
-                float lerp1 = PApplet.map(j, 0, t.trailNo, 0, 1);
-                int c1 = p.color(200, 60, 20, 255);
-                int c2 = p.color(0, 0, 255, 255);
-                int c = p.lerpColor(c1, c2, lerp1);
-                p.stroke(c);
+
+                if ((type == 4) || (type == 2)) {
+                    float lerp1 = PApplet.map(j, 0, t.trailNo, 0, 1);
+                    int c1 = p.color(125, 60, 100, 255);
+                    int c2 = p.color(200, 255, 50, 255);
+                    int c = p.lerpColor(c1, c2, lerp1);
+                    p.stroke(c);
+                }
+
+                if ((type == 3) || (type == 1)) {
+                    float lerp1 = PApplet.map(j, 0, t.trailNo, 0, 1);
+                    int c1 = p.color(255, 255, 255, 255);
+                    int c2 = p.color(255, 255, 255, 255);
+                    int c = p.lerpColor(c1, c2, lerp1);
+                    p.stroke(c);
+                }
                 p.curveVertex(t.x, t.y, t.z);
             }
             p.endShape();
@@ -236,7 +247,6 @@ public class Boid extends Vec3D {
         return var2;
     }
 
-
     Vec3D vertexseek() {
         Vec3D b = seekclosestpt(0);
         float varb = b.distanceTo(this);
@@ -244,7 +254,10 @@ public class Boid extends Vec3D {
             type = 3;
             p.start2 = true;
             node = false;
+            trailpop.add(new ArrayList<trail>());
+            trno++;
             p.vertexhash.get(b).taken = 1;
+            p.vertexhash.get(b).boid = this;
         }
 
         return seek(b);
@@ -254,19 +267,20 @@ public class Boid extends Vec3D {
     Vec3D vertexseek1() {
         Vec3D b = seekclosestpt(1);
         float varb = b.distanceTo(this);
-        if (varb < 54) {
+        if (varb < 58) {
             type = 4;
             trailpop.add(new ArrayList<trail>());
             trno++;
             node2 = false;
             Vec3D c = seekclosestpt(0);
+            p.vertexhash.get(b).takencnt++;
             p.vertexhash.get(c).taken = 1;
+            stigboid = p.vertexhash.get(b).boid;
         }
 
         return seek(b);
 
     }
-
 
     // Separation
     Vec3D separate(List<Boid> boids) {
@@ -339,23 +353,25 @@ public class Boid extends Vec3D {
         }
     }
 
-    Vec3D seektrail(ArrayList tPop) {
-        float neighbordist = 2000;
+    Vec3D seektrail(List<List<trail>> tPop) {
+        float neighbordist = 800;
         Vec3D sum = new Vec3D(0, 0, 0);
         int count = 0;
-
-        for (int i = 0; i < tPop.size(); i++) {
-            trail t = (trail) tPop.get(i);
-            float distance = this.distanceTo(t);
-            if ((distance < neighbordist)&& (inView(t, 120)) ) {
-                sum.addSelf(t);
-                count++;
+            for (int i = 0; i < tPop.size(); i++) {
+                List<trail> a = tPop.get(i);
+                for (int j = 0; j < a.size(); j++) {
+                    trail t = a.get(j);
+                    float distance = this.distanceToSquared(t);
+                    if ((distance < neighbordist * neighbordist)) {
+                        sum.addSelf(t);
+                        count++;
+                    }
+                }
             }
-        }
-        if (count > 0) {
-            sum.scaleSelf(1 / (float) count);
-            return seek(sum);
-        }
+            if (count > 0) {
+                sum.scaleSelf(1 / (float) count);
+                return seek(sum);
+            }
         return sum;
     }
 
