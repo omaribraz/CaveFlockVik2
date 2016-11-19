@@ -20,9 +20,11 @@ public class Boid extends Vec3D {
     Vec3D ali = null;
     Vec3D coh = null;
     Vec3D stig = null;
+    Vec3D vert = null;
     Boid stigboid = null;
 
-    Vec3D go = null;
+    meshvertices go = null;
+    meshvertices go1 = null;
 
     List<List<trail>> trailpop;
 
@@ -54,20 +56,23 @@ public class Boid extends Vec3D {
     void rules(Boid a) {
         if (a.type == 1) {
             a.node = true;
-            if(a.go==null) {
+            a.print = false;
+            a.go1 = null;
+            if (a.go == null) {
                 a.go = seekclosestptless(0, 80);
             }
-            if(a.go.magnitude()<20) {
+            if (a.go.magnitude() < 40) {
                 a.go = seekclosestptless(0, 80);
             }
         }
 
         if (a.type == 2) {
             a.node2 = true;
-            if(a.go==null) {
+            a.print = false;
+            if (a.go == null) {
                 a.go = seekclosestpt(1);
             }
-            if(a.go.magnitude()<20) {
+            if (a.go.magnitude() < 40) {
                 a.go = seekclosestpt(1);
             }
 
@@ -75,15 +80,21 @@ public class Boid extends Vec3D {
 
         if (a.type == 3) {
             a.print = true;
-            a.go=null;
+            a.go = null;
+            if (a.go1 == null) {
+                a.go1 = seekclosestptmorerange(0, 110, 700);
+            }
+            if (a.go1.magnitude() < 20) {
+                a.go1 = seekclosestptmorerange(0, 110, 700);
+            }
         }
 
         if (a.type == 4) {
             a.print = true;
-            a.go=null;
+            a.go = null;
         }
 
-        if ((a.printcnt > 60) && (a.type == 3)) {
+        if ((a.printcnt > 3000) && (a.type == 3)) {
             a.type = 1;
             a.print = false;
             a.printcnt = 0;
@@ -114,10 +125,10 @@ public class Boid extends Vec3D {
         }
 
         if (a.type == 4) {
-            a.sep.scaleSelf(6.0f);
+            a.sep.scaleSelf(2.0f);
             a.ali.scaleSelf(0.4f);
             a.coh.scaleSelf(0.1f);
-            if (stigfollow) a.stig.scaleSelf(0.8f);
+            if (stigfollow) a.stig.scaleSelf(16.8f);
         }
 
         if (a.type == 3) {
@@ -125,6 +136,7 @@ public class Boid extends Vec3D {
             a.ali.scaleSelf(0.6f);
             a.coh.scaleSelf(0.1f);
             a.nod.scaleSelf(0f);
+            a.vert.scaleSelf(1.2f);
         }
 
         if (a.type == 1) {
@@ -159,6 +171,7 @@ public class Boid extends Vec3D {
                 sep = separate(boidpos, 90.0f);
                 ali = align(boidpos, 40.0f);
                 coh = cohesion(boidpos, 40.0f);
+
             }
 
             if ((type == 2) || (type == 4)) {
@@ -167,19 +180,35 @@ public class Boid extends Vec3D {
                 coh = cohesion(boidpos, 30.0f);
             }
 
-            if ((node) && (type == 1)) nod = vertexseek();
-            if ((node2) && (type == 2) && (p.start2)) nod2 = vertexseek1();
-            if ((type == 4) && (stigfollow) && (stigboid != null)) stig = seektrail(stigboid.trailpop, 150.0f);
+            if ((node) && (type == 1)) {
+                nod = vertexseek();
+
+            }
+            if(type==3) {
+                vert = edgeseek();
+
+            }
+            if ((node2) && (type == 2) && (p.start2)) {
+                nod2 = vertexseek1();
+
+            }
+            if ((type == 4) && (stigfollow) && (stigboid != null)) {
+                stig = seektrail(stigboid.trailpop, 120.0f);
+            }
 
             flockrules(this);
 
 
             applyForce(sep);
+
             applyForce(ali);
             applyForce(coh);
             if ((node) && (type == 1)) applyForce(nod);
             if ((node2) && (type == 2) && (p.start2)) applyForce(nod2);
-            if ((type == 4) && (stigfollow)) applyForce(stig);
+            if ((type == 4) && (stigfollow)) {
+                applyForce(stig);
+            }
+            if(type==3)applyForce(vert);
 
             boidpos.clear();
         }
@@ -197,7 +226,7 @@ public class Boid extends Vec3D {
     }
 
     Vec3D seek(Vec3D target) {
-        Vec3D desired = target.subSelf(this);
+        Vec3D desired = target.subSelf(this.copy());
         desired.normalize();
         desired.scaleSelf(maxspeed);
         Vec3D steer = desired.subSelf(vel);
@@ -259,15 +288,15 @@ public class Boid extends Vec3D {
         p.popMatrix();
     }
 
-    Vec3D seekclosestpt(int var1) {
-        Vec3D var2 = null;
+    meshvertices seekclosestpt(int var1) {
+        meshvertices var2 = null;
         float var3 = 3.4028235E38F;
         for (int i = 0; i < p.vertexpop.size(); i++) {
-            meshvertices b = p.vertexpop.get(i);
+            meshvertices b = (meshvertices) p.vertexpop.get(i);
             if (b.taken == var1) {
                 float var6 = b.distanceTo(this.copy());
                 if (var6 < var3) {
-                    var2 = b.copy();
+                    var2 = b;
                     var3 = var6;
                 }
             }
@@ -275,8 +304,8 @@ public class Boid extends Vec3D {
         return var2;
     }
 
-    Vec3D seekclosestptless(int var1, int slope1) {
-        Vec3D var2 = null;
+    meshvertices seekclosestptless(int var1, int slope1) {
+        meshvertices var2 = null;
         float var3 = 3.4028235E38F;
         for (int i = 0; i < p.vertexpop.size(); i++) {
             meshvertices b = p.vertexpop.get(i);
@@ -284,7 +313,7 @@ public class Boid extends Vec3D {
                 if (b.slope < slope1) {
                     float var6 = b.distanceTo(this.copy());
                     if (var6 < var3) {
-                        var2 = b.copy();
+                        var2 = b;
                         var3 = var6;
                     }
                 }
@@ -293,16 +322,34 @@ public class Boid extends Vec3D {
         return var2;
     }
 
-    Vec3D seekclosestptmore(int var1, int slope1) {
-        Vec3D var2 = null;
+    meshvertices seekclosestptmore(int var1, int slope1) {
+        meshvertices var2 = null;
         float var3 = 3.4028235E38F;
         for (int i = 0; i < p.vertexpop.size(); i++) {
             meshvertices b = p.vertexpop.get(i);
             if (b.taken == var1) {
                 if (b.slope > slope1) {
-                    float var6 = b.distanceTo(this);
+                    float var6 = b.distanceTo(this.copy());
                     if (var6 < var3) {
-                        var2 = b.copy();
+                        var2 = b;
+                        var3 = var6;
+                    }
+                }
+            }
+        }
+        return var2;
+    }
+
+    meshvertices seekclosestptmorerange(int var1, int slope1, int range) {
+        meshvertices var2 = null;
+        float var3 = 3.4028235E38F;
+        for (int i = 0; i < p.vertexpop.size(); i++) {
+            meshvertices b = p.vertexpop.get(i);
+            if (b.taken == var1) {
+                if (b.slope > slope1) {
+                    float var6 = b.distanceTo(this.copy());
+                    if ((var6 < var3) && (var6 > range)) {
+                        var2 = b;
                         var3 = var6;
                     }
                 }
@@ -313,37 +360,60 @@ public class Boid extends Vec3D {
 
     Vec3D vertexseek() {
         if (go == null) {
-            go = seekclosestptless(0, 80);
+            go = seekclosestptless(0, 50);
         }
-        float varb = go.distanceTo(this);
-        if ((varb < 52)) {
+        float varb = go.distanceTo(this.copy());
+        if ((varb < 62)) {
             type = 3;
             p.start2 = true;
             node = false;
             trailpop.add(new ArrayList<trail>());
             trno++;
-            p.vertexhash.get(go).taken = 1;
-            p.vertexhash.get(go).boid = this;
+            go.taken = 1;
+            go.boid = this;
         }
-        return seek(go);
+        return seek(go.copy());
+    }
+
+    Vec3D edgeseek() {
+        if (go1 == null) {
+            go1 = seekclosestptmorerange(0, 110, 500);
+        }
+        float varb = go1.distanceTo(this.copy());
+        if ((varb < 100)) {
+            type = 1;
+            node = true;
+            go1.taken = 1;
+            go1.boid = this;
+        }
+        return seek(go1.copy());
     }
 
     Vec3D vertexseek1() {
-        if(go==null) {
+
+        Vec3D a1 = new Vec3D(0, 0, 0);
+
+        if (go == null) {
             go = seekclosestpt(1);
         }
-        float varb = go.distanceTo(this);
-        if (varb < 54) {
+        float varb = go.distanceTo(this.copy());
+
+        if (varb < 500) {
+            a1 = seek(go.copy());
+        } else go = null;
+
+        if (varb < 64) {
             type = 4;
             trailpop.add(new ArrayList<trail>());
             trno++;
             node2 = false;
-            Vec3D c = seekclosestpt(0);
-            p.vertexhash.get(go).takencnt++;
-            p.vertexhash.get(c).taken = 1;
-            stigboid = p.vertexhash.get(go).boid;
+            meshvertices c = seekclosestpt(0);
+            go.takencnt++;
+            c.taken = 1;
+            stigboid = go.boid;
         }
-        return seek(go);
+
+        return a1;
     }
 
     // Separation
@@ -352,17 +422,18 @@ public class Boid extends Vec3D {
         Vec3D steer = new Vec3D(0, 0, 0);
         int count = 0;
         for (Boid other : boids) {
-            float d = this.distanceToSquared(other);
+            float d = this.copy().distanceToSquared(other);
             if ((d > 0) && (d < desiredseparation)) {
-                Vec3D diff = this.sub(other);
+                Vec3D diff = this.copy().subSelf(other);
                 diff.normalize();
                 diff.scaleSelf(1 / d);
-                steer.add(diff);
+                steer.addSelf(diff);
                 count++;
             }
         }
         if (count > 0) {
             steer.scaleSelf(1 / (float) count);
+
         }
         if (steer.magnitude() > 0) {
             steer.normalize();
@@ -379,7 +450,7 @@ public class Boid extends Vec3D {
         Vec3D sum = new Vec3D(0, 0, 0);
         int count = 0;
         for (Boid other : boids) {
-            float d = this.distanceToSquared(other);
+            float d = this.copy().distanceToSquared(other);
             if ((d > 0) && (d < neighbordist)) {
                 sum.addSelf(other.vel);
                 count++;
@@ -403,7 +474,7 @@ public class Boid extends Vec3D {
         Vec3D sum = new Vec3D(0, 0, 0);
         int count = 0;
         for (Boid other : boids) {
-            float d = this.distanceToSquared(other);
+            float d = this.copy().distanceToSquared(other);
             if ((d > 0) && (d < neighbordist)) {
                 sum.addSelf(other);
                 count++;
@@ -425,7 +496,7 @@ public class Boid extends Vec3D {
             List<trail> a = tPop.get(i);
             for (int j = 0; j < a.size(); j++) {
                 trail t = a.get(j);
-                float distance = this.distanceToSquared(t);
+                float distance = this.copy().distanceToSquared(t);
                 if ((distance < neighbordist)) {
                     sum.addSelf(t);
                     count++;
@@ -455,9 +526,10 @@ public class Boid extends Vec3D {
     // Wraparound
     void borders() {
         List<Vec3D> cavepoints = null;
-        cavepoints = p.meshoctree.getPointsWithinSphere(this.copy(), 50);
+        cavepoints = p.meshoctree.getPointsWithinSphere(this.copy(), 60);
 
         if (cavepoints != null) {
+
 
             if (cavepoints.size() > 0) {
                 if (!reflect) {
@@ -468,19 +540,20 @@ public class Boid extends Vec3D {
                     float var3 = 3.4028235E38F;
                     for (int i = 0; i < cavepoints.size(); i++) {
                         Vec3D vara = cavepoints.get(i);
-                        float dista = vara.distanceToSquared(this);
+                        float dista = vara.distanceToSquared(this.copy());
                         if (dista < var3) {
                             var1 = vara;
                             var3 = dista;
                         }
                     }
-                    Vec3D norm = p.Normal.get(var1);
-                    norm.scaleSelf(-1);
-                    float velnorm = vel.dot(norm.normalize());
-                    Vec3D refl1 = norm.normalize().scaleSelf(velnorm);
-                    vel = vel.addSelf(norm);
-                    vel = vel.subSelf(refl1.scaleSelf(1.0f));
-                    vel = vel.subSelf(refl1.scaleSelf(1.5f));
+
+                        Vec3D norm = p.Normal.get(var1);
+                        norm.scaleSelf(-1);
+                        float velnorm = vel.copy().dot(norm.normalize());
+                        Vec3D refl1 = norm.normalize().scaleSelf(velnorm);
+                        vel = vel.copy().addSelf(norm);
+                        vel = vel.copy().subSelf(refl1.scaleSelf(3.0f));
+
 
                 }
             }

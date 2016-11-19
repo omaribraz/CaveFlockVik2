@@ -98,12 +98,8 @@ public class CaveFlockVik extends PApplet {
 
         meshrun();
 
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 10; i++) {
             flock.addBoid(new Boid(this, new Vec3D(random(xminint + 200, xmaxint - 200), random(yminint + 200, ymaxint - 200), random(zminint + 200, zmaxint - 200)), new Vec3D(random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI)), 1));
-        }
-
-        for (int i = 0; i < 0; i++) {
-            flock.addBoid(new Boid(this, new Vec3D(random(xminint + 200, xmaxint - 200), random(yminint + 200, ymaxint - 200), random(zminint + 200, zmaxint - 200)), new Vec3D(random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI)), 2));
         }
 
 
@@ -111,6 +107,13 @@ public class CaveFlockVik extends PApplet {
 
     public void draw() {
         background(0);
+
+
+        if ((frameCount%20 == 0)&&(flock.boids.size()<150)) {
+            for (int i = 0; i < 5; i++) {
+                flock.addBoid(new Boid(this, new Vec3D(random(xminint + 300, xmaxint - 300), random(yminint + 300, ymaxint - 300), random(zminint + 300, zmaxint - 300)), new Vec3D(random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI)), 2));
+            }
+        }
 
         boidoctree.run();
 
@@ -204,7 +207,6 @@ public class CaveFlockVik extends PApplet {
             vertexpop.add(a);
             vertexhash.put(vertex, a);
             meshoctree.addPts(a);
-
 
 
         }
