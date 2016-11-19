@@ -46,23 +46,21 @@ public class CaveFlockVik extends PApplet {
     ArrayList xMax = new ArrayList();
     ArrayList yMax = new ArrayList();
     ArrayList zMax = new ArrayList();
-    ArrayList meshpts= new ArrayList();
+    ArrayList meshpts = new ArrayList();
     ArrayList<Vec3D> cavepts;
-    ArrayList <Vec3D> Boidpos = new ArrayList();
-    ArrayList <Vec3D> Boidpop = new ArrayList();
-    ArrayList <meshvertices> vertexpop = new ArrayList<>();
+    ArrayList<Vec3D> Boidpos = new ArrayList();
+    ArrayList<Vec3D> Boidpop = new ArrayList();
+    ArrayList<meshvertices> vertexpop = new ArrayList<>();
 
     HashMap<Vec3D, Integer> Slope = new HashMap();
     HashMap<Vec3D, Vec3D> Normal = new HashMap();
-    HashMap<Vec3D, meshvertices>vertexhash =new HashMap();
+    HashMap<Vec3D, meshvertices> vertexhash = new HashMap();
 
     float DIM = 1500;
     boolean showOctree = true;
     boolean useSphere = true;
 
     float RADIUS = 20;
-
-
 
 
     Octree meshoctree;
@@ -85,26 +83,30 @@ public class CaveFlockVik extends PApplet {
     public void setup() {
 
         flock = new Flock(this);
-        cam = new PeasyCam(this, 750, 750, 0, 2200);
-        obj = loadShape("data/"+"drone.obj");
+
+        obj = loadShape("data/" + "drone.obj");
         obj.scale(3);
+
+        meshsetup();
+
+
+        Vec3D a = cave2.computeCentroid();
+        meshoctree = new Octree(this, new Vec3D(-1, -1, -1).scaleSelf(a), DIM * 2);
+        boidoctree = new Octree(this, new Vec3D(-1, -1, -1).scaleSelf(a), DIM * 2);
+
+        cam = new PeasyCam(this, a.x, a.y, a.z, 2200);
 
         meshrun();
 
-        Vec3D a =cave2.computeCentroid() ;
-
-        meshoctree=new Octree(this,new Vec3D(-1, -1, -1).scaleSelf(a), DIM*2);
-        boidoctree =new Octree(this,new Vec3D(-1, -1, -1).scaleSelf(a), DIM*2);
-
-        for (int i = 0; i <100; i++) {
-            flock.addBoid(new Boid(this,new Vec3D(random(xminint+200, xmaxint-200), random(yminint+200, ymaxint-200), random(zminint+200, zmaxint-200)), new Vec3D(random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI)),1));
+        for (int i = 0; i < 50; i++) {
+            flock.addBoid(new Boid(this, new Vec3D(random(xminint + 200, xmaxint - 200), random(yminint + 200, ymaxint - 200), random(zminint + 200, zmaxint - 200)), new Vec3D(random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI)), 1));
         }
 
-        for (int i = 0; i <200; i++) {
-            flock.addBoid(new Boid(this,new Vec3D(random(xminint+200, xmaxint-200), random(yminint+200, ymaxint-200), random(zminint+200, zmaxint-200)), new Vec3D(random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI)),2));
+        for (int i = 0; i < 0; i++) {
+            flock.addBoid(new Boid(this, new Vec3D(random(xminint + 200, xmaxint - 200), random(yminint + 200, ymaxint - 200), random(zminint + 200, zmaxint - 200)), new Vec3D(random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI)), 2));
         }
 
-        meshoctree.addAll(cavepts);
+
     }
 
     public void draw() {
@@ -114,8 +116,8 @@ public class CaveFlockVik extends PApplet {
 
         flock.run();
 
-        if (frameCount<30) {
-            for (int i = 0; i <flock.boids.size(); i++) {
+        if (frameCount < 30) {
+            for (int i = 0; i < flock.boids.size(); i++) {
                 Boid b = flock.boids.get(i);
                 b.checkMesh();
             }
@@ -136,14 +138,14 @@ public class CaveFlockVik extends PApplet {
         popMatrix();
 
 
-        for(int i = 0; i<vertexpop.size(); i++){
+        for (int i = 0; i < vertexpop.size(); i++) {
             meshvertices a = vertexpop.get(i);
             a.update();
         }
     }
 
-    private void meshrun() {
-        cave2 = (WETriangleMesh) new STLReader().loadBinary(sketchPath("data/"+"cave.stl"), STLReader.WEMESH);
+    private void meshsetup() {
+        cave2 = (WETriangleMesh) new STLReader().loadBinary(sketchPath("data/" + "cave.stl"), STLReader.WEMESH);
         mesh = new HEC_FromBinarySTLFile(sketchPath("data/" + "cave.stl")).create();
 
 
@@ -151,30 +153,34 @@ public class CaveFlockVik extends PApplet {
 
         cavepts = (new ArrayList<Vec3D>(cave2.getVertices()));
 
-        for (int i=0; i< novert1; i++) {
+        for (int i = 0; i < novert1; i++) {
             Vec3D a = cavepts.get(i);
             xMax.add(a.x);
             yMax.add(a.y);
             zMax.add(a.z);
         }
 
-        xmaxint = (float)Collections.max(xMax);
-        ymaxint = (float)Collections.max(yMax);
-        zmaxint = (float)Collections.max(zMax);
-        xminint = (float)Collections.min(xMax);
-        yminint = (float)Collections.min(yMax);
-        zminint = (float)Collections.min(zMax);
+        xmaxint = (float) Collections.max(xMax);
+        ymaxint = (float) Collections.max(yMax);
+        zmaxint = (float) Collections.max(zMax);
+        xminint = (float) Collections.min(xMax);
+        yminint = (float) Collections.min(yMax);
+        zminint = (float) Collections.min(zMax);
 
         xMax.clear();
         yMax.clear();
         zMax.clear();
+
+    }
+
+    private void meshrun() {
+
 
         int novert = mesh.getNumberOfVertices();
 
         for (int i = 0; i < novert; i++) {
 
             WB_Coord mnorm = mesh.getVertexNormal(i);
-            WB_Coord vertex1 = mesh.getVertex(i);
             Vec3D vertex = cave2.getVertexForID(i);
 
             float xnPos = mnorm.xf();
@@ -188,23 +194,22 @@ public class CaveFlockVik extends PApplet {
 
             slope = degrees(slope);
 
-            slope = 180-slope;
+            slope = 180 - slope;
 
             int slopeint = (int) slope;
             Slope.put(vertex, slopeint);
             Normal.put(vertex, mnormv);
 
-            if((slopeint<80)){
-                meshvertices a = new meshvertices(this,vertex,slopeint,mnormv);
-                vertexpop.add(a);
-                vertexhash.put(vertex,a);
-            }
+            meshvertices a = new meshvertices(this, vertex, slopeint, mnormv);
+            vertexpop.add(a);
+            vertexhash.put(vertex, a);
+            meshoctree.addPts(a);
 
 
 
         }
 
-        gfx=new ToxiclibsSupport(this);
+        gfx = new ToxiclibsSupport(this);
         // render = new WB_Render(this);
     }
 

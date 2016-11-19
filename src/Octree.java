@@ -18,6 +18,8 @@ public class Octree extends PointOctree {
         addPoint(b);
     }
 
+    void addPts(meshvertices a){addPoint(a);}
+
     void run() {
         updateTree();
     }
