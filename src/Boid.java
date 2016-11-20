@@ -22,6 +22,7 @@ public class Boid extends Vec3D {
     Vec3D stig = null;
     Vec3D alitr = null;
     Vec3D vert = null;
+    Vec3D noise;
     Boid stigboid = null;
 
     meshvertices go = null;
@@ -36,6 +37,7 @@ public class Boid extends Vec3D {
     boolean node = false;
     boolean node2 = false;
     boolean stigfollow = false;
+    boolean pnoise =false;
 
     int printcnt;
     int type;
@@ -55,6 +57,19 @@ public class Boid extends Vec3D {
         trailpop = new ArrayList<>();
         friends = new ArrayList<>();
         thinkTimer = (int) (p.random(10));
+    }
+
+    void run() {
+        increment();
+        rules(this);
+        if (thinkTimer == 0) {
+            if(!p.boidoctre)getFriends();
+            if(p.boidoctre) friends = p.boidoctree.getPointsWithinSphere(this.copy(), 120);
+        }
+        flock();
+        if ((p.frameCount % 3 == 0) && (p.frameCount > 20) && (print)) trail();
+        update();
+        borders();
     }
 
     void increment() {
@@ -133,6 +148,7 @@ public class Boid extends Vec3D {
             a.coh.scaleSelf(0.1f);
             a.nod.scaleSelf(0f);
             a.vert.scaleSelf(1.4f);
+            if(pnoise) a.noise.scaleSelf(0.2f);
         }
 
         if (a.type == 1) {
@@ -142,20 +158,6 @@ public class Boid extends Vec3D {
             a.coh.scaleSelf(0.2f);
         }
 
-    }
-
-
-    void run() {
-        increment();
-        rules(this);
-        if (thinkTimer == 0) {
-            if(!p.boidoctre)getFriends();
-            if(p.boidoctre) friends = p.boidoctree.getPointsWithinSphere(this.copy(), 120);
-        }
-        flock();
-        if ((p.frameCount % 3 == 0) && (p.frameCount > 20) && (print)) trail();
-        update();
-        borders();
     }
 
     void getFriends() {
@@ -174,13 +176,6 @@ public class Boid extends Vec3D {
 
     void flock() {
 
-
-//        List boidpos = null;
-//        if ((type == 1) || (type == 3)) boidpos = p.boidoctree.getPointsWithinSphere(this.copy(), 120);
-//        if ((type == 2) || (type == 4)) boidpos = p.boidoctree.getPointsWithinSphere(this.copy(), 80);
-
-
-        //       if (boidpos != null) {
 
         if ((type == 1) || (type == 3)) {
             sep = separate(friends, 90.0f);
@@ -201,6 +196,7 @@ public class Boid extends Vec3D {
         }
         if (type == 3) {
             vert = edgeseek();
+            if(pnoise)noise = new Vec3D(p.random(2)-1,p.random(2)-1,p.random(2)-1);
         }
         if ((node2) && (type == 2) && (p.start2)) {
             nod2 = vertexseek1();
@@ -228,8 +224,8 @@ public class Boid extends Vec3D {
         }
         if (type == 3) {
             applyForce(vert);
+            if(pnoise) applyForce(noise);
         }
-        //       }
     }
 
     void update() {
