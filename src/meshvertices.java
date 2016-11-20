@@ -21,7 +21,7 @@ public class meshvertices extends Vec3D {
     }
 
     void update(){
-        if(takencnt>7){
+        if(takencnt>2){
             p.vertexpop.remove(this);
         }
         render();
@@ -31,9 +31,11 @@ public class meshvertices extends Vec3D {
 
 
     void render(){
-        p.stroke(200,20);
-        p.strokeWeight(2);
-        p.point(this.x,this.y,this.z);
+        if(taken==7){
+            p.stroke(255,255);
+            p.strokeWeight(2);
+            p.point(this.x,this.y,this.z);
+        }
     }
 
 

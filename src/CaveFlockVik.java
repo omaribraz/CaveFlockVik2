@@ -39,6 +39,7 @@ public class CaveFlockVik extends PApplet {
     float zminint;
     float zmaxint;
     boolean start2 = false;
+    boolean boidoctre = false;
 
     WETriangleMesh cave2;
     HE_Mesh mesh;
@@ -92,7 +93,7 @@ public class CaveFlockVik extends PApplet {
 
         Vec3D a = cave2.computeCentroid();
         meshoctree = new Octree(this, new Vec3D(-1, -1, -1).scaleSelf(a), DIM * 2);
-        boidoctree = new Octree(this, new Vec3D(-1, -1, -1).scaleSelf(a), DIM * 2);
+        if(boidoctre)boidoctree = new Octree(this, new Vec3D(-1, -1, -1).scaleSelf(a), DIM * 2);
 
         cam = new PeasyCam(this, a.x, a.y, a.z, 2200);
 
@@ -109,13 +110,13 @@ public class CaveFlockVik extends PApplet {
         background(0);
 
 
-        if ((frameCount%20 == 0)&&(flock.boids.size()<150)) {
+        if ((frameCount%20 == 0)&&(flock.boids.size()<50)) {
             for (int i = 0; i < 5; i++) {
                 flock.addBoid(new Boid(this, new Vec3D(random(xminint + 300, xmaxint - 300), random(yminint + 300, ymaxint - 300), random(zminint + 300, zmaxint - 300)), new Vec3D(random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI), random(-TWO_PI, TWO_PI)), 2));
             }
         }
 
-        boidoctree.run();
+        if(boidoctre)boidoctree.run();
 
         flock.run();
 

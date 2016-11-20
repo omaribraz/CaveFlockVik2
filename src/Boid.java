@@ -20,6 +20,7 @@ public class Boid extends Vec3D {
     Vec3D ali = null;
     Vec3D coh = null;
     Vec3D stig = null;
+    Vec3D alitr = null;
     Vec3D vert = null;
     Boid stigboid = null;
 
@@ -36,11 +37,12 @@ public class Boid extends Vec3D {
     boolean node2 = false;
     boolean stigfollow = false;
 
-    int popsize;
     int printcnt;
     int type;
-    int bouncecnt;
     int trno = -1;
+    int thinkTimer = 0;
+
+    List friends;
 
     Boid(CaveFlockVik _p, Vec3D pos, Vec3D _vel, int _type) {
         super(pos);
@@ -51,6 +53,12 @@ public class Boid extends Vec3D {
         maxspeed = 2;
         maxforce = 0.07f;
         trailpop = new ArrayList<>();
+        friends = new ArrayList<>();
+        thinkTimer = (int) (p.random(10));
+    }
+
+    void increment() {
+        thinkTimer = (thinkTimer + 1) % 3;
     }
 
     void rules(Boid a) {
@@ -61,9 +69,6 @@ public class Boid extends Vec3D {
             if (a.go == null) {
                 a.go = seekclosestptless(0, 80);
             }
-            if (a.go.magnitude() < 40) {
-                a.go = seekclosestptless(0, 80);
-            }
         }
 
         if (a.type == 2) {
@@ -72,10 +77,6 @@ public class Boid extends Vec3D {
             if (a.go == null) {
                 a.go = seekclosestpt(1);
             }
-            if (a.go.magnitude() < 40) {
-                a.go = seekclosestpt(1);
-            }
-
         }
 
         if (a.type == 3) {
@@ -84,13 +85,11 @@ public class Boid extends Vec3D {
             if (a.go1 == null) {
                 a.go1 = seekclosestptmorerange(0, 110, 700);
             }
-            if (a.go1.magnitude() < 20) {
-                a.go1 = seekclosestptmorerange(0, 110, 700);
-            }
         }
 
         if (a.type == 4) {
             a.print = true;
+            a.stigfollow = true;
             a.go = null;
         }
 
@@ -101,18 +100,12 @@ public class Boid extends Vec3D {
 
         }
 
-        if ((a.printcnt > 30) && (a.type == 4)) {
+        if ((a.printcnt > 50) && (a.type == 4)) {
             a.type = 2;
             a.print = false;
             a.printcnt = 0;
 
         }
-
-        if (a.stigboid != null) {
-            if (a.stigboid.trailpop.get(0).size() > 0) {
-                a.stigfollow = true;
-            }
-        } else a.stigfollow = false;
 
     }
 
@@ -125,10 +118,13 @@ public class Boid extends Vec3D {
         }
 
         if (a.type == 4) {
-            a.sep.scaleSelf(2.0f);
-            a.ali.scaleSelf(0.4f);
-            a.coh.scaleSelf(0.1f);
-            if (stigfollow) a.stig.scaleSelf(16.8f);
+            a.sep.scaleSelf(0.1f);
+            a.ali.scaleSelf(0.0f);
+            a.coh.scaleSelf(0.0f);
+            if (stigfollow) {
+                a.stig.scaleSelf(2.0f);
+                a.alitr.scaleSelf(0.05f);
+            }
         }
 
         if (a.type == 3) {
@@ -136,7 +132,7 @@ public class Boid extends Vec3D {
             a.ali.scaleSelf(0.6f);
             a.coh.scaleSelf(0.1f);
             a.nod.scaleSelf(0f);
-            a.vert.scaleSelf(1.2f);
+            a.vert.scaleSelf(1.4f);
         }
 
         if (a.type == 1) {
@@ -150,68 +146,90 @@ public class Boid extends Vec3D {
 
 
     void run() {
+        increment();
         rules(this);
+        if (thinkTimer == 0) {
+            if(!p.boidoctre)getFriends();
+            if(p.boidoctre) friends = p.boidoctree.getPointsWithinSphere(this.copy(), 120);
+        }
         flock();
         if ((p.frameCount % 3 == 0) && (p.frameCount > 20) && (print)) trail();
         update();
         borders();
-        if (p.frameCount > 25) render();
+    }
+
+    void getFriends() {
+        List<Boid> nearby = new ArrayList<>();
+        for (int i = 0; i < p.flock.boids.size(); i++) {
+            Boid test = p.flock.boids.get(i);
+            if (test == this) continue;
+            if (p.abs(test.x - this.x) < 90 &&
+                    p.abs(test.y - this.y) < 90 &&
+                    p.abs(test.z - this.z) < 90) {
+                nearby.add(test);
+            }
+        }
+        friends = nearby;
     }
 
     void flock() {
 
-        List boidpos = null;
-        if ((type == 1) || (type == 3)) boidpos = p.boidoctree.getPointsWithinSphere(this.copy(), 120);
-        if ((type == 2) || (type == 4)) boidpos = p.boidoctree.getPointsWithinSphere(this.copy(), 80);
+
+//        List boidpos = null;
+//        if ((type == 1) || (type == 3)) boidpos = p.boidoctree.getPointsWithinSphere(this.copy(), 120);
+//        if ((type == 2) || (type == 4)) boidpos = p.boidoctree.getPointsWithinSphere(this.copy(), 80);
 
 
-        if (boidpos != null) {
+        //       if (boidpos != null) {
 
-            if ((type == 1) || (type == 3)) {
-                sep = separate(boidpos, 90.0f);
-                ali = align(boidpos, 40.0f);
-                coh = cohesion(boidpos, 40.0f);
+        if ((type == 1) || (type == 3)) {
+            sep = separate(friends, 90.0f);
+            ali = align(friends, 40.0f);
+            coh = cohesion(friends, 40.0f);
 
-            }
-
-            if ((type == 2) || (type == 4)) {
-                sep = separate(boidpos, 60.0f);
-                ali = align(boidpos, 20.0f);
-                coh = cohesion(boidpos, 30.0f);
-            }
-
-            if ((node) && (type == 1)) {
-                nod = vertexseek();
-
-            }
-            if(type==3) {
-                vert = edgeseek();
-
-            }
-            if ((node2) && (type == 2) && (p.start2)) {
-                nod2 = vertexseek1();
-
-            }
-            if ((type == 4) && (stigfollow) && (stigboid != null)) {
-                stig = seektrail(stigboid.trailpop, 120.0f);
-            }
-
-            flockrules(this);
-
-
-            applyForce(sep);
-
-            applyForce(ali);
-            applyForce(coh);
-            if ((node) && (type == 1)) applyForce(nod);
-            if ((node2) && (type == 2) && (p.start2)) applyForce(nod2);
-            if ((type == 4) && (stigfollow)) {
-                applyForce(stig);
-            }
-            if(type==3)applyForce(vert);
-
-            boidpos.clear();
         }
+
+        if ((type == 2) || (type == 4)) {
+            sep = separate(friends, 60.0f);
+            ali = align(friends, 20.0f);
+            coh = cohesion(friends, 30.0f);
+        }
+
+        if ((node) && (type == 1)) {
+            nod = vertexseek();
+
+        }
+        if (type == 3) {
+            vert = edgeseek();
+        }
+        if ((node2) && (type == 2) && (p.start2)) {
+            nod2 = vertexseek1();
+        }
+        if ((type == 4)) {
+            stig = seektrail(p.flock.trailPop, 50.0f);
+            alitr = aligntrail(p.flock.trailPop, 50.0f);
+        }
+
+        flockrules(this);
+
+
+        applyForce(sep);
+        applyForce(ali);
+        applyForce(coh);
+        if ((node) && (type == 1)) {
+            applyForce(nod);
+        }
+        if ((node2) && (type == 2) && (p.start2)) {
+            applyForce(nod2);
+        }
+        if ((type == 4)) {
+            applyForce(stig);
+            applyForce(alitr);
+        }
+        if (type == 3) {
+            applyForce(vert);
+        }
+        //       }
     }
 
     void update() {
@@ -237,10 +255,27 @@ public class Boid extends Vec3D {
     void trail() {
         trail tr = new trail(p, this.copy(), vel.copy());
         trailpop.get(trno).add(tr);
+        if (type == 3) {
+            p.flock.addTrail(tr);
+        }
         printcnt++;
     }
 
-    void trailrender() {
+    void draw() {
+        float theta = vel.headingXY() + p.radians(90);
+        p.stroke(255);
+        p.pushMatrix();
+        p.translate(x, y, z);
+        p.rotate(theta);
+        if (type == 1) p.obj.setFill(p.color(0, 0, 255));
+        if (type == 3) p.obj.setFill(p.color(0, 255, 255));
+        if (type == 2) p.obj.setFill(p.color(255, 255, 255));
+        if (type == 4) p.obj.setFill(p.color(255, 0, 255));
+        p.obj.setStroke(100);
+        p.obj.scale(1);
+        p.shape(p.obj);
+        p.popMatrix();
+
         p.noFill();
         p.strokeWeight(2);
 
@@ -269,30 +304,14 @@ public class Boid extends Vec3D {
             }
             p.endShape();
         }
-    }
 
-    void render() {
-        float theta = vel.headingXY() + p.radians(90);
-
-        p.stroke(255);
-        p.pushMatrix();
-        p.translate(x, y, z);
-        p.rotate(theta);
-        if (type == 1) p.obj.setFill(p.color(0, 0, 255));
-        if (type == 3) p.obj.setFill(p.color(0, 255, 255));
-        if (type == 2) p.obj.setFill(p.color(255, 255, 255));
-        if (type == 4) p.obj.setFill(p.color(255, 0, 255));
-        p.obj.setStroke(100);
-        p.obj.scale(1);
-        p.shape(p.obj);
-        p.popMatrix();
     }
 
     meshvertices seekclosestpt(int var1) {
         meshvertices var2 = null;
         float var3 = 3.4028235E38F;
         for (int i = 0; i < p.vertexpop.size(); i++) {
-            meshvertices b = (meshvertices) p.vertexpop.get(i);
+            meshvertices b = p.vertexpop.get(i);
             if (b.taken == var1) {
                 float var6 = b.distanceTo(this.copy());
                 if (var6 < var3) {
@@ -362,15 +381,14 @@ public class Boid extends Vec3D {
         if (go == null) {
             go = seekclosestptless(0, 50);
         }
-        float varb = go.distanceTo(this.copy());
-        if ((varb < 62)) {
+        float dist = go.distanceToSquared(this);
+        if (dist < 64 * 64) {
             type = 3;
             p.start2 = true;
             node = false;
             trailpop.add(new ArrayList<trail>());
             trno++;
             go.taken = 1;
-            go.boid = this;
         }
         return seek(go.copy());
     }
@@ -379,12 +397,11 @@ public class Boid extends Vec3D {
         if (go1 == null) {
             go1 = seekclosestptmorerange(0, 110, 500);
         }
-        float varb = go1.distanceTo(this.copy());
-        if ((varb < 100)) {
+        float dist = go1.distanceToSquared(this);
+        if (dist < 64 * 64) {
             type = 1;
             node = true;
-            go1.taken = 1;
-            go1.boid = this;
+            go1.taken = 3;
         }
         return seek(go1.copy());
     }
@@ -396,23 +413,25 @@ public class Boid extends Vec3D {
         if (go == null) {
             go = seekclosestpt(1);
         }
-        float varb = go.distanceTo(this.copy());
 
-        if (varb < 500) {
-            a1 = seek(go.copy());
-        } else go = null;
+        if (go != null) {
+            float dist = go.distanceToSquared(this);
 
-        if (varb < 64) {
-            type = 4;
-            trailpop.add(new ArrayList<trail>());
-            trno++;
-            node2 = false;
-            meshvertices c = seekclosestpt(0);
-            go.takencnt++;
-            c.taken = 1;
-            stigboid = go.boid;
+            if (dist < 500 * 500) {
+                a1 = seek(go.copy());
+            } else go = null;
+
+            if (dist < 55 * 55) {
+                type = 4;
+                trailpop.add(new ArrayList<trail>());
+                trno++;
+                node2 = false;
+                go.takencnt++;
+                stigboid = go.boid;
+                meshvertices c = seekclosestpt(0);
+                c.taken = 3;
+            }
         }
-
         return a1;
     }
 
@@ -450,8 +469,9 @@ public class Boid extends Vec3D {
         Vec3D sum = new Vec3D(0, 0, 0);
         int count = 0;
         for (Boid other : boids) {
+            if (other == this) continue;
             float d = this.copy().distanceToSquared(other);
-            if ((d > 0) && (d < neighbordist)) {
+            if ((d < neighbordist)) {
                 sum.addSelf(other.vel);
                 count++;
             }
@@ -474,8 +494,9 @@ public class Boid extends Vec3D {
         Vec3D sum = new Vec3D(0, 0, 0);
         int count = 0;
         for (Boid other : boids) {
+            if (other == this) continue;
             float d = this.copy().distanceToSquared(other);
-            if ((d > 0) && (d < neighbordist)) {
+            if ((d < neighbordist)) {
                 sum.addSelf(other);
                 count++;
             }
@@ -488,26 +509,47 @@ public class Boid extends Vec3D {
         }
     }
 
-    Vec3D seektrail(List<List<trail>> tPop, float var1) {
-        float neighbordist = var1 * var1;
+    Vec3D seektrail(ArrayList<trail> tPop, float var1) {
+        float neighbordist = var1;
         Vec3D sum = new Vec3D(0, 0, 0);
         int count = 0;
+
         for (int i = 0; i < tPop.size(); i++) {
-            List<trail> a = tPop.get(i);
-            for (int j = 0; j < a.size(); j++) {
-                trail t = a.get(j);
-                float distance = this.copy().distanceToSquared(t);
-                if ((distance < neighbordist)) {
-                    sum.addSelf(t);
-                    count++;
-                }
+            trail t = tPop.get(i);
+            if (p.abs(t.x - this.x) < neighbordist && p.abs(t.y - this.y) < neighbordist && p.abs(t.x - this.x) < neighbordist) {
+                sum.addSelf(t.copy());
+                count++;
             }
         }
+
         if (count > 0) {
             sum.scaleSelf(1 / (float) count);
             return seek(sum);
         }
+
         return sum;
+    }
+
+    Vec3D aligntrail(ArrayList<trail> tPop, float var1) {
+        Vec3D sum = new Vec3D(0, 0, 0);
+        int count = 0;
+        float neighbordist = var1 * var1;
+        for (int i = 0; i < tPop.size(); i++) {
+            trail t = tPop.get(i);
+            float dist = this.distanceToSquared(t);
+            if ((dist > 0) && (dist < neighbordist)) {
+                sum.addSelf(t.orientation);
+                count++;
+            }
+        }
+        if (count > 0) {
+            sum.scaleSelf(1 / (float) count);
+            sum.normalize();
+            sum.scaleSelf(maxspeed);
+            return sum;
+        } else {
+            return new Vec3D(0, 0, 0);
+        }
     }
 
     boolean inView(Vec3D target, float angle) {
@@ -547,12 +589,12 @@ public class Boid extends Vec3D {
                         }
                     }
 
-                        Vec3D norm = p.Normal.get(var1);
-                        norm.scaleSelf(-1);
-                        float velnorm = vel.copy().dot(norm.normalize());
-                        Vec3D refl1 = norm.normalize().scaleSelf(velnorm);
-                        vel = vel.copy().addSelf(norm);
-                        vel = vel.copy().subSelf(refl1.scaleSelf(3.0f));
+                    Vec3D norm = p.Normal.get(var1);
+                    norm.scaleSelf(-1);
+                    float velnorm = vel.copy().dot(norm.normalize());
+                    Vec3D refl1 = norm.normalize().scaleSelf(velnorm);
+                    vel = vel.copy().addSelf(norm);
+                    vel = vel.copy().subSelf(refl1.scaleSelf(3.0f));
 
 
                 }

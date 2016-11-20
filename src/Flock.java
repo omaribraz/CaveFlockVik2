@@ -17,12 +17,8 @@ public class Flock {
     void run() {
         for (Boid b : boids) {
             b.run();
-            b.trailrender();
+            b.draw();
         }
-//        for (int i = 0; i<trailPop.size(); i++) {
-//            trail t = trailPop.get(i);
-//            t.render();
-//        }
     }
 
     void addBoid( Boid b) {
