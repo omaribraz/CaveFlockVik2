@@ -21,21 +21,23 @@ public class meshvertices extends Vec3D {
     }
 
     void update(){
-        if(takencnt>2){
+        if(takencnt>5){
             p.vertexpop.remove(this);
         }
-        render();
+//        render();
 
     }
 
 
 
     void render(){
-        if(taken==7){
+        if(taken==1){
             p.stroke(255,255);
-            p.strokeWeight(2);
+            p.strokeWeight(20);
             p.point(this.x,this.y,this.z);
         }
+
+
     }
 
 
