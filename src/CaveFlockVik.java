@@ -46,7 +46,7 @@ public class CaveFlockVik extends PApplet {
     boolean start2 = false;
 
     boolean boidoctre = false;
-    boolean makecorridor = false;
+    boolean makecorridor = true;
     boolean makepath = false;
 
     public WETriangleMesh cave;
@@ -138,17 +138,17 @@ public class CaveFlockVik extends PApplet {
 
         setpathfind();
 
-        for (int i = 0; i < 35; i++) {
+        for (int i = 0; i < 6; i++) {
             Vec3D a = randomitem(pts);
             flock.addBoid(new Boid(this, a, 1));
         }
 
-        for (int i = 0; i < 150; i++) {
+        for (int i = 0; i < 10; i++) {
             Vec3D a = randomitem(pts);
             flock.addBoid(new Boid(this, a, 2));
         }
 
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 30; i++) {
             Vec3D a = randomitem(pts);
             flock.addBoid(new Boid(this, a, 7));
         }
@@ -158,13 +158,18 @@ public class CaveFlockVik extends PApplet {
             flock.addBoid(new Boid(this, a, 8));
         }
 
+        for (int i = 0; i < 300; i++) {
+            Vec3D a = randomitem(pts);
+            flock.addBoid(new Boid(this, a, 6));
+        }
+
 
     }
 
     public void draw() {
         background(0);
 
-        if (frameCount < 30) {
+        if (frameCount < 10) {
             for (int i = 0; i < flock.boids.size(); i++) {
                 Boid b = flock.boids.get(i);
                 b.checkMesh();
@@ -177,7 +182,7 @@ public class CaveFlockVik extends PApplet {
 //            }
 //        }
 
-        if (frameCount > 30) {
+        if (frameCount > 10) {
             if((makepath)||(makecorridor)) {
                 ArrayList<Boid> pathboid = new ArrayList<>();
                 ArrayList<Boid> pathroom = new ArrayList<>();
@@ -458,7 +463,17 @@ public class CaveFlockVik extends PApplet {
                     new LaplacianSmooth().filter(corridor, 1);
                 }
 
+                corridor = corridor.getTranslated(new Vec3D(meshcentre.x, meshcentre.y, meshcentre.z));
+
+
+
+//                translate(meshcentre.x, meshcentre.y, meshcentre.z);
                 //                   buildmesh = true;
+
+
+//                corridor.computeFaceNormals();
+//                corridor.computeVertexNormals();
+
 
             }
 
@@ -488,7 +503,6 @@ public class CaveFlockVik extends PApplet {
             //           corridor.saveAsOBJ(sketchPath("data/" + "corridor.obj"));
 
 //            pushMatrix();
-//            translate(meshcentre.x, meshcentre.y, meshcentre.z);
 //            strokeWeight(1f);
 //            stroke(255, 0, 0);
 //            noFill();
