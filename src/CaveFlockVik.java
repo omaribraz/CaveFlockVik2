@@ -1,5 +1,5 @@
 /**
- * Created by Vikram on 11/12/2016.
+ * Created by Omar on 11/12/2016.
  */
 
 import processing.core.PShape;
@@ -138,12 +138,12 @@ public class CaveFlockVik extends PApplet {
 
         setpathfind();
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 35; i++) {
             Vec3D a = randomitem(pts);
             flock.addBoid(new Boid(this, a, 1));
         }
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             Vec3D a = randomitem(pts);
             flock.addBoid(new Boid(this, a, 2));
         }
@@ -158,7 +158,7 @@ public class CaveFlockVik extends PApplet {
             flock.addBoid(new Boid(this, a, 8));
         }
 
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 20; i++) {
             Vec3D a = randomitem(pts);
             flock.addBoid(new Boid(this, a, 6));
         }

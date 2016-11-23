@@ -4,11 +4,11 @@
 import toxi.geom.Vec3D;
 public class meshvertices extends Vec3D {
     private CaveFlockVik p;
-    int slope;
-    Vec3D Normal;
-    int taken;
-    int takencnt;
-    Boid boid;
+    public int slope;
+    public Vec3D Normal;
+    public int taken;
+    public int takencnt;
+    public Boid boid;
 
 
     meshvertices( CaveFlockVik _p, Vec3D v, int s, Vec3D n) {
@@ -20,7 +20,7 @@ public class meshvertices extends Vec3D {
         takencnt = 0;
     }
 
-    void update(){
+    public void update(){
         if(takencnt>5){
             p.vertexpop.remove(this);
         }
@@ -30,16 +30,13 @@ public class meshvertices extends Vec3D {
 
 
 
-    void render(){
-        if(taken==1){
-            p.stroke(255,255);
+    private void render() {
+        if (taken == 1) {
+            p.stroke(255, 255);
             p.strokeWeight(20);
-            p.point(this.x,this.y,this.z);
+            p.point(this.x, this.y, this.z);
         }
-
-
     }
-
 
 
 

@@ -2,12 +2,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Vikram on 11/12/2016.
+ * Created by Omar on 11/12/2016.
  */
 public class Flock {
     private CaveFlockVik p;
-    List<Boid> boids;
-    List<trail> trailPop;
+    public List<Boid> boids;
+    public List<trail> trailPop;
 
     Flock(CaveFlockVik _p) {
         p = _p;
@@ -15,26 +15,26 @@ public class Flock {
         trailPop = new ArrayList<trail>();
     }
 
-    void run() {
+    public void run() {
         for (Boid b : boids) {
             b.run();
             b.draw();
         }
     }
 
-    void addBoid( Boid b) {
+    public void addBoid( Boid b) {
         boids.add(b);
     }
 
-    void removeBoid( Boid b) {
+    public void removeBoid( Boid b) {
         boids.remove(b);
     }
 
-    void addTrail( trail t) {
+    public void addTrail( trail t) {
         trailPop.add(t);
     }
 
-    void removeTrail( trail t) {
+    public void removeTrail( trail t) {
         trailPop.remove(t);
     }
 }

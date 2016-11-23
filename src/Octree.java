@@ -14,29 +14,29 @@ public class Octree extends PointOctree {
         p = _p;
     }
 
-    void addBoid(Boid b) {
+    private void addBoid(Boid b) {
         addPoint(b);
     }
 
-    void addPts(meshvertices a){addPoint(a);}
+    public void addPts(meshvertices a){addPoint(a);}
 
-    void run() {
+    public void run() {
         updateTree();
     }
 
-    void updateTree() {
+    private void updateTree() {
         empty();
         for (Boid b : p.flock.boids) {
             addBoid(b);
         }
     }
 
-    void draw() {
+    public void draw() {
         drawNode(this);
         System.out.println("p = " + this.getNumChildren());
     }
 
-    void drawNode(PointOctree n) {
+    private void drawNode(PointOctree n) {
         if (n.getNumChildren() > 0) {
             p.noFill();
             p.stroke(255);

@@ -6,45 +6,45 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Vikram on 11/12/2016.
+ * Created by Omar on 11/12/2016.
  */
 public class Boid extends Vec3D {
     private CaveFlockVik p;
-    Vec3D vel;
-    Vec3D acc;
-    Vec3D nod = null;
-    Vec3D nod2 = null;
-    Vec3D sep = null;
-    Vec3D ali = null;
-    Vec3D coh = null;
-    Vec3D stig = null;
-    Vec3D alitr = null;
-    Vec3D vert = null;
-    Vec3D noise;
-    Vec3D cra = null;
+    private Vec3D vel;
+    private Vec3D acc;
+    private Vec3D nod = null;
+    private Vec3D nod2 = null;
+    private Vec3D sep = null;
+    private Vec3D ali = null;
+    private Vec3D coh = null;
+    private Vec3D stig = null;
+    private Vec3D alitr = null;
+    private Vec3D vert = null;
+    private Vec3D noise;
+    private Vec3D cra = null;
 
-    Boid stigboid = null;
+    private Boid stigboid = null;
 
-    meshvertices go = null;
-    meshvertices go1 = null;
+    private meshvertices go = null;
+    private meshvertices go1 = null;
 
-    List<List<trail>> trailpop;
+    private List<List<trail>> trailpop;
 
-    float maxforce;
-    float maxspeed;
-    boolean reflect = true;
-    boolean print = false;
-    boolean node = false;
-    boolean node2 = false;
-    boolean stigfollow = false;
-    boolean pnoise = false;
+    private float maxforce;
+    private float maxspeed;
+    private boolean reflect = true;
+    private boolean print = false;
+    private boolean node = false;
+    private boolean node2 = false;
+    private boolean stigfollow = false;
+    private boolean pnoise = false;
 
-    int printcnt;
-    int type;
-    int trno = -1;
-    int thinkTimer = 0;
+    private int printcnt;
+    public int type;
+    private int trno = -1;
+    private int thinkTimer = 0;
 
-    List friends;
+    private List friends;
 
     Boid(CaveFlockVik _p, Vec3D pos, int _type) {
         super(pos);
@@ -59,7 +59,7 @@ public class Boid extends Vec3D {
         thinkTimer = (int) (p.random(10));
     }
 
-    void run() {
+    public void run() {
         increment();
         rules(this);
         if (thinkTimer == 0) {
@@ -72,11 +72,11 @@ public class Boid extends Vec3D {
         borders();
     }
 
-    void increment() {
-        thinkTimer = (thinkTimer + 1) % 3;
+    private void increment() {
+        thinkTimer = (thinkTimer + 1) % 5;
     }
 
-    void getFriends(int atype, int var1) {
+    private void getFriends(int atype, int var1) {
         List<Boid> nearby = new ArrayList<>();
         for (int i = 0; i < p.flock.boids.size(); i++) {
             Boid test = p.flock.boids.get(i);
@@ -92,7 +92,7 @@ public class Boid extends Vec3D {
         friends = nearby;
     }
 
-    void rules(Boid a) {
+    private void rules(Boid a) {
 
         if((a.type==6)&&(p.frameCount<12)) {
             trailpop.add(new ArrayList<trail>());
@@ -149,7 +149,7 @@ public class Boid extends Vec3D {
 
     }
 
-    void flockrules(Boid a) {
+    private void flockrules(Boid a) {
 
         if (a.type == 2) {
             if ((a.node2) && (p.start2)) a.nod2.scaleSelf(0.7f);
@@ -199,7 +199,7 @@ public class Boid extends Vec3D {
 
     }
 
-    void flock() {
+    private void flock() {
 
 
         if ((type == 1) || (type == 3)) {
@@ -278,18 +278,18 @@ public class Boid extends Vec3D {
         }
     }
 
-    void update() {
+    private void update() {
         vel.addSelf(acc);
         vel.limit(maxspeed);
         this.addSelf(vel);
         acc.scaleSelf(0);
     }
 
-    void applyForce(Vec3D force) {
+    private void applyForce(Vec3D force) {
         acc.addSelf(force);
     }
 
-    Vec3D seek(Vec3D target) {
+    private Vec3D seek(Vec3D target) {
         Vec3D desired = target.subSelf(this.copy());
         desired.normalize();
         desired.scaleSelf(maxspeed);
@@ -298,7 +298,7 @@ public class Boid extends Vec3D {
         return steer;
     }
 
-    void trail() {
+    private void trail() {
         Vec3D tpos = new Vec3D((int)this.copy().x,(int)this.copy().y,(int)this.copy().z);
         Vec3D tvel = new Vec3D((int)this.vel.copy().x,(int)this.vel.copy().y,(int)this.vel.copy().z);
         trail tr = new trail(p, tpos, tvel);
@@ -314,7 +314,7 @@ public class Boid extends Vec3D {
         }
     }
 
-    void draw() {
+    public void draw() {
         float theta = vel.headingXY() + p.radians(90);
         p.stroke(255);
         p.pushMatrix();
@@ -369,7 +369,7 @@ public class Boid extends Vec3D {
 
     }
 
-    meshvertices seekclosestpt(int var1) {
+    private meshvertices seekclosestpt(int var1) {
         meshvertices var2 = null;
         float var3 = 3.4028235E38F;
         for (int i = 0; i < p.vertexpop.size(); i++) {
@@ -385,7 +385,7 @@ public class Boid extends Vec3D {
         return var2;
     }
 
-    meshvertices seekclosestptless(int var1, int slope1) {
+    private meshvertices seekclosestptless(int var1, int slope1) {
         meshvertices var2 = null;
         float var3 = 3.4028235E38F;
         for (int i = 0; i < p.vertexpop.size(); i++) {
@@ -403,7 +403,7 @@ public class Boid extends Vec3D {
         return var2;
     }
 
-    meshvertices seekclosestptmore(int var1, int slope1) {
+    private meshvertices seekclosestptmore(int var1, int slope1) {
         meshvertices var2 = null;
         float var3 = 3.4028235E38F;
         for (int i = 0; i < p.vertexpop.size(); i++) {
@@ -421,7 +421,7 @@ public class Boid extends Vec3D {
         return var2;
     }
 
-    meshvertices seekclosestptmorerange(int var1, int slope1, int range) {
+    private meshvertices seekclosestptmorerange(int var1, int slope1, int range) {
         meshvertices var2 = null;
         float var3 = 3.4028235E38F;
         for (int i = 0; i < p.vertexpop.size(); i++) {
@@ -439,7 +439,7 @@ public class Boid extends Vec3D {
         return var2;
     }
 
-    Vec3D vertexseek() {
+    private Vec3D vertexseek() {
         if (go == null) {
             go = seekclosestptless(0, 50);
         }
@@ -455,7 +455,7 @@ public class Boid extends Vec3D {
         return seek(go.copy());
     }
 
-    Vec3D crawl(WETriangleMesh mesh, int var1, int var2) {
+    private Vec3D crawl(WETriangleMesh mesh, int var1, int var2) {
         Vec3D predict = vel.copy();
         predict.normalize();
         predict.scaleSelf(var1);
@@ -473,7 +473,7 @@ public class Boid extends Vec3D {
         }
     }
 
-    Vec3D edgeseek() {
+    private Vec3D edgeseek() {
         if (go1 == null) {
             go1 = seekclosestptmorerange(0, 110, 200);
         }
@@ -486,7 +486,7 @@ public class Boid extends Vec3D {
         return seek(go1.copy());
     }
 
-    Vec3D vertexseek1() {
+    private Vec3D vertexseek1() {
 
         Vec3D a1 = new Vec3D(0, 0, 0);
 
@@ -515,8 +515,7 @@ public class Boid extends Vec3D {
         return a1;
     }
 
-    // Separation
-    Vec3D separate(List<Boid> boids, float var1) {
+    private Vec3D separate(List<Boid> boids, float var1) {
         float desiredseparation = var1 * var1;
         Vec3D steer = new Vec3D(0, 0, 0);
         int count = 0;
@@ -543,8 +542,7 @@ public class Boid extends Vec3D {
         return steer;
     }
 
-    // Alignment
-    Vec3D align(List<Boid> boids, float var1) {
+    private Vec3D align(List<Boid> boids, float var1) {
         float neighbordist = var1 * var1;
         Vec3D sum = new Vec3D(0, 0, 0);
         int count = 0;
@@ -568,8 +566,7 @@ public class Boid extends Vec3D {
         }
     }
 
-    // Cohesion
-    Vec3D cohesion(List<Boid> boids, float var1) {
+    private Vec3D cohesion(List<Boid> boids, float var1) {
         float neighbordist = var1 * var1;
         Vec3D sum = new Vec3D(0, 0, 0);
         int count = 0;
@@ -589,7 +586,7 @@ public class Boid extends Vec3D {
         }
     }
 
-    Vec3D seektrail(List<trail> tPop, float var1) {
+    private Vec3D seektrail(List<trail> tPop, float var1) {
         float neighbordist = var1;
         Vec3D sum = new Vec3D(0, 0, 0);
         int count = 0;
@@ -610,7 +607,7 @@ public class Boid extends Vec3D {
         return sum;
     }
 
-    Vec3D aligntrail(List<trail> tPop, float var1) {
+    private Vec3D aligntrail(List<trail> tPop, float var1) {
         Vec3D sum = new Vec3D(0, 0, 0);
         int count = 0;
         float neighbordist = var1 * var1;
@@ -632,7 +629,7 @@ public class Boid extends Vec3D {
         }
     }
 
-    boolean inView(Vec3D target, float angle) {
+    private boolean inView(Vec3D target, float angle) {
         boolean resultBool;
         Vec3D vec = target.copy().subSelf(this.copy());
         float result = vel.copy().angleBetween(vec);
@@ -645,8 +642,7 @@ public class Boid extends Vec3D {
         return resultBool;
     }
 
-    // Wraparound
-    void borders() {
+    private void borders() {
         List<Vec3D> cavepoints = null;
         cavepoints = p.meshoctree.getPointsWithinSphere(this.copy(), 60);
 
@@ -687,7 +683,7 @@ public class Boid extends Vec3D {
         }
     }
 
-    void checkMesh() {
+    public void checkMesh() {
 
         Vec3D cavept = p.cave.getClosestVertexToPoint(this);
         float distpt = cavept.distanceToSquared(this);
