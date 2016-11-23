@@ -299,7 +299,9 @@ public class Boid extends Vec3D {
     }
 
     void trail() {
-        trail tr = new trail(p, this.copy(), vel.copy());
+        Vec3D tpos = new Vec3D((int)this.copy().x,(int)this.copy().y,(int)this.copy().z);
+        Vec3D tvel = new Vec3D((int)this.vel.copy().x,(int)this.vel.copy().y,(int)this.vel.copy().z);
+        trail tr = new trail(p, tpos, tvel);
         if(type!=6) {
             trailpop.get(trno).add(tr);
             if (type == 3) {
@@ -587,7 +589,7 @@ public class Boid extends Vec3D {
         }
     }
 
-    Vec3D seektrail(ArrayList<trail> tPop, float var1) {
+    Vec3D seektrail(List<trail> tPop, float var1) {
         float neighbordist = var1;
         Vec3D sum = new Vec3D(0, 0, 0);
         int count = 0;
@@ -608,7 +610,7 @@ public class Boid extends Vec3D {
         return sum;
     }
 
-    Vec3D aligntrail(ArrayList<trail> tPop, float var1) {
+    Vec3D aligntrail(List<trail> tPop, float var1) {
         Vec3D sum = new Vec3D(0, 0, 0);
         int count = 0;
         float neighbordist = var1 * var1;

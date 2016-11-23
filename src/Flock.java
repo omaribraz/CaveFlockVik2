@@ -1,12 +1,13 @@
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Vikram on 11/12/2016.
  */
 public class Flock {
     private CaveFlockVik p;
-    ArrayList<Boid> boids;
-    ArrayList<trail> trailPop;
+    List<Boid> boids;
+    List<trail> trailPop;
 
     Flock(CaveFlockVik _p) {
         p = _p;

@@ -53,9 +53,9 @@ public class CaveFlockVik extends PApplet {
     public HE_Mesh mesh;
 
 
-    public ArrayList<Vec3D> cavepts;
-    public ArrayList<meshvertices> vertexpop = new ArrayList<>();
-    public ArrayList<Vec3D> pts = new ArrayList<>();
+    public List<Vec3D> cavepts;
+    public List<meshvertices> vertexpop = new ArrayList<>();
+    public List<Vec3D> pts = new ArrayList<>();
 
     public HashMap<Vec3D, Integer> Slope = new HashMap();
     public HashMap<Vec3D, Vec3D> Normal = new HashMap();
@@ -184,8 +184,8 @@ public class CaveFlockVik extends PApplet {
 
         if (frameCount > 10) {
             if((makepath)||(makecorridor)) {
-                ArrayList<Boid> pathboid = new ArrayList<>();
-                ArrayList<Boid> pathroom = new ArrayList<>();
+                List<Boid> pathboid = new ArrayList<>();
+                List<Boid> pathroom = new ArrayList<>();
 
                 for (Boid a : flock.boids) {
                     if (a.type == 7) {
@@ -198,14 +198,14 @@ public class CaveFlockVik extends PApplet {
 
 
                 if (makepath) {
-                    ArrayList<String> pathptsfile = new ArrayList<>();
+                    List<String> pathptsfile = new ArrayList<>();
                     runpathfind2(pathptsfile, pathboid);
                 }
 
                 if (makecorridor) {
-                    ArrayList<String> pathptsfile = new ArrayList<>();
-                    ArrayList<Pathagent> pathagtpts = new ArrayList<>();
-                    ArrayList<Vec3D> circpts = new ArrayList<>();
+                    List<String> pathptsfile = new ArrayList<>();
+                    List<Pathagent> pathagtpts = new ArrayList<>();
+                    List<Vec3D> circpts = new ArrayList<>();
 
 
                     runpathfind2(pathptsfile, pathboid);
@@ -289,7 +289,7 @@ public class CaveFlockVik extends PApplet {
 
     }
 
-    private void readpath(ArrayList<Vec3D> cpts) {
+    private void readpath(List<Vec3D> cpts) {
 
         String linept[] = loadStrings("data/" + "path.txt");
         int stringcount = 0;
@@ -428,7 +428,7 @@ public class CaveFlockVik extends PApplet {
 
     }
 
-    private void drawcorridor(ArrayList<Pathagent> pathapts) {
+    private void drawcorridor(List<Pathagent> pathapts) {
         if ((makecorridor)) {
 
             ballvel = 0;
@@ -513,7 +513,7 @@ public class CaveFlockVik extends PApplet {
         }
     }
 
-    private void runpathfind2(ArrayList<String> p1,ArrayList<Boid> bds) {
+    private void runpathfind2(List<String> p1,List<Boid> bds) {
 
         for (Boid b : bds) {
             pathFinder = makePathFinder(3);
@@ -576,7 +576,7 @@ public class CaveFlockVik extends PApplet {
         }
     }
 
-    private Vec3D randomitem(ArrayList <Vec3D> pts){
+    private Vec3D randomitem(List <Vec3D> pts){
         int index = (int) random(pts.size());
         Vec3D item = pts.get(index);
         return item;
