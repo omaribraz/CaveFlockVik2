@@ -7,12 +7,12 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="core" level="project" />
     <orderEntry type="library" name="peasycam" level="project" />
     <orderEntry type="library" name="exp4j" level="project" />
     <orderEntry type="library" name="toxiclibs_p5" level="project" />
     <orderEntry type="library" name="volumeutils" level="project" />
     <orderEntry type="library" name="VideoExport" level="project" />
     <orderEntry type="library" name="Path_Finder" level="project" />
+    <orderEntry type="library" name="core" level="project" />
   </component>
 </module>
