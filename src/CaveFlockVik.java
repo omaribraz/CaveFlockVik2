@@ -138,7 +138,7 @@ public class CaveFlockVik extends PApplet {
 
         setpathfind();
 
-        for (int i = 0; i < 35; i++) {
+        for (int i = 0; i < 15; i++) {
             Vec3D a = randomitem(pts);
             flock.addBoid(new Boid(this, a, 1));
         }
@@ -148,7 +148,7 @@ public class CaveFlockVik extends PApplet {
             flock.addBoid(new Boid(this, a, 2));
         }
 
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 10; i++) {
             Vec3D a = randomitem(pts);
             flock.addBoid(new Boid(this, a, 7));
         }
@@ -158,11 +158,7 @@ public class CaveFlockVik extends PApplet {
             flock.addBoid(new Boid(this, a, 8));
         }
 
-        for (int i = 0; i < 20; i++) {
-            Vec3D a = randomitem(pts);
-            flock.addBoid(new Boid(this, a, 6));
-        }
-
+        videoExport = new VideoExport(this, "basic.mp4");
 
     }
 
@@ -196,7 +192,6 @@ public class CaveFlockVik extends PApplet {
                     }
                 }
 
-
                 if (makepath) {
                     List<String> pathptsfile = new ArrayList<>();
                     runpathfind2(pathptsfile, pathboid);
@@ -206,7 +201,6 @@ public class CaveFlockVik extends PApplet {
                     List<String> pathptsfile = new ArrayList<>();
                     List<Pathagent> pathagtpts = new ArrayList<>();
                     List<Vec3D> circpts = new ArrayList<>();
-
 
                     runpathfind2(pathptsfile, pathboid);
                     readpath(circpts);
@@ -227,14 +221,10 @@ public class CaveFlockVik extends PApplet {
                     drawcorridor(pathagtpts);
                 }
             }
-
-
             flock.run();
             if (boidoctre) boidoctree.run();
         }
         //if octree.draw();
-
-
 
         pushMatrix();
         fill(40, 120);
@@ -243,15 +233,12 @@ public class CaveFlockVik extends PApplet {
         gfx.mesh(cave, false, 0);
         popMatrix();
 
-
-
-
         for (int i = 0; i < vertexpop.size(); i++) {
             meshvertices a = vertexpop.get(i);
             a.update();
         }
 
-//        videoExport.saveFrame();
+//       videoExport.saveFrame();
     }
 
     private void meshsetup() {

@@ -37,6 +37,8 @@ public class Boid extends Vec3D {
     private boolean node = false;
     private boolean node2 = false;
     private boolean stigfollow = false;
+    private boolean craw = false;
+    private int cracnt = 0;
     private boolean pnoise = false;
 
     private int printcnt;
@@ -53,7 +55,9 @@ public class Boid extends Vec3D {
         type = _type;
         acc = new Vec3D(0, 0, 0);
         maxspeed = 4;
+        if((type==7)&&(type==8))maxspeed = 1;
         maxforce = 0.77f;
+        if((type==7)&&(type==8))maxforce = 0.44f;
         trailpop = new ArrayList<>();
         friends = new ArrayList<>();
         thinkTimer = (int) (p.random(10));
@@ -94,7 +98,7 @@ public class Boid extends Vec3D {
 
     private void rules(Boid a) {
 
-        if((a.type==6)&&(p.frameCount<12)) {
+        if ((a.type == 6) && (p.frameCount < 12)) {
             trailpop.add(new ArrayList<trail>());
         }
 
@@ -123,20 +127,20 @@ public class Boid extends Vec3D {
             }
         }
 
-        if (a.type == 6) {
-            a.print = true;
-        }
-
         if (a.type == 4) {
             a.print = true;
             a.stigfollow = true;
             a.go = null;
         }
 
-        if ((a.printcnt > 3000) && (a.type == 3)) {
+        if ((a.printcnt > 40) && (a.type == 3)) {
             a.type = 1;
             a.print = false;
             a.printcnt = 0;
+            if(a.cracnt>30){
+                a.craw = false;
+                a.cracnt = 0;
+            }
 
         }
 
@@ -163,7 +167,7 @@ public class Boid extends Vec3D {
             a.ali.scaleSelf(0.05f);
             a.coh.scaleSelf(0.007f);
             if (stigfollow) {
-                a.stig.scaleSelf(0.4f);
+                a.stig.scaleSelf(0.7f);
                 a.alitr.scaleSelf(0.05f);
             }
         }
@@ -173,7 +177,8 @@ public class Boid extends Vec3D {
             a.ali.scaleSelf(0.03f);
             a.coh.scaleSelf(0.005f);
             a.nod.scaleSelf(0f);
-            a.vert.scaleSelf(0.052f);
+            a.vert.scaleSelf(0.202f);
+            if ((p.makecorridor) && (craw)) a.cra.scaleSelf(0.4f);
             if (pnoise) a.noise.scaleSelf(0.01f);
         }
 
@@ -188,13 +193,6 @@ public class Boid extends Vec3D {
             a.sep.scaleSelf(0.7f);
             a.ali.scaleSelf(0.5f);
             a.coh.scaleSelf(0.2f);
-        }
-
-        if(a.type==6){
-            if(p.makecorridor)a.cra.scaleSelf(0.4f);
-            a.sep.scaleSelf(0.2f);
-            a.ali.scaleSelf(0.07f);
-            a.coh.scaleSelf(0.01f);
         }
 
     }
@@ -219,15 +217,12 @@ public class Boid extends Vec3D {
 
         }
 
-        if(type==6){
-            sep = separate(friends, 90.0f);
-            ali = align(friends, 40.0f);
-            coh = cohesion(friends, 40.0f);
-            if(p.makecorridor)cra = crawl(p.corridor,80,2);
-        }
-
         if (type == 3) {
             vert = edgeseek();
+            if ((p.makecorridor) && (craw)) {
+                cra = crawl(p.corridor, 80, 2);
+                cracnt++;
+            }
             if (pnoise) noise = new Vec3D(p.random(2) - 1, p.random(2) - 1, p.random(2) - 1);
         }
 
@@ -244,16 +239,13 @@ public class Boid extends Vec3D {
             sep = separate(friends, 90.0f);
             ali = align(friends, 40.0f);
             coh = cohesion(friends, 40.0f);
-
         }
 
         flockrules(this);
 
-        if(type!=6) {
-            applyForce(sep);
-            applyForce(ali);
-            applyForce(coh);
-        }
+        applyForce(sep);
+        applyForce(ali);
+        applyForce(coh);
 
         if ((node) && (type == 1)) {
             applyForce(nod);
@@ -270,11 +262,8 @@ public class Boid extends Vec3D {
 
         if (type == 3) {
             applyForce(vert);
+            if ((p.makecorridor) && (craw)) applyForce(cra);
             if (pnoise) applyForce(noise);
-        }
-
-        if (type == 6) {
-            if (p.makecorridor) applyForce(cra);
         }
     }
 
@@ -299,19 +288,14 @@ public class Boid extends Vec3D {
     }
 
     private void trail() {
-        Vec3D tpos = new Vec3D((int)this.copy().x,(int)this.copy().y,(int)this.copy().z);
-        Vec3D tvel = new Vec3D((int)this.vel.copy().x,(int)this.vel.copy().y,(int)this.vel.copy().z);
+        Vec3D tpos = new Vec3D((int) this.copy().x, (int) this.copy().y, (int) this.copy().z);
+        Vec3D tvel = new Vec3D((int) this.vel.copy().x, (int) this.vel.copy().y, (int) this.vel.copy().z);
         trail tr = new trail(p, tpos, tvel);
-        if(type!=6) {
-            trailpop.get(trno).add(tr);
-            if (type == 3) {
-                p.flock.addTrail(tr);
-            }
-            printcnt++;
+        trailpop.get(trno).add(tr);
+        if (type == 3) {
+            p.flock.addTrail(tr);
         }
-        if(type==6){
-            trailpop.get(0).add(tr);
-        }
+        printcnt++;
     }
 
     public void draw() {
@@ -446,6 +430,7 @@ public class Boid extends Vec3D {
         float dist = go.distanceToSquared(this);
         if (dist < 64 * 64) {
             type = 3;
+            craw = true;
             p.start2 = true;
             node = false;
             trailpop.add(new ArrayList<trail>());
