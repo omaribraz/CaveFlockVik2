@@ -21,7 +21,7 @@ public class meshvertices extends Vec3D {
     }
 
     public void update(){
-        if(takencnt>5){
+        if(takencnt>4){
             p.vertexpop.remove(this);
         }
 //        render();
